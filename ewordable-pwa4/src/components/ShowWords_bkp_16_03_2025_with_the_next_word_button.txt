@@ -18,7 +18,7 @@ const ShowWords = () => {
 
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
-            console.log('Correct meaning response:', data);
+            console.log('Correct meaning response:', data); // Debug the response
             setCorrectMeaning(data);
             return data;
         } catch (err) {
@@ -28,7 +28,7 @@ const ShowWords = () => {
         }
     };
 
-    // Fetch incorrect meanings
+    // Fetch a single incorrect meaning
     const fetchRandomMeanings = async () => {
         try {
             const response = await fetch('http://13.60.163.190:5000/show_random_meanings_to_the_word', {
@@ -38,7 +38,8 @@ const ShowWords = () => {
 
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
-            console.log('Incorrect meaning response:', data);
+            console.log('Incorrect meaning response:', data); // Debug the response
+            setIncorrectMeanings(data);
             return data;
         } catch (err) {
             console.error('Fetch error:', err);
@@ -47,7 +48,7 @@ const ShowWords = () => {
         }
     };
 
-    // Prepare quiz options: 1 correct + 2 incorrect meanings
+    // Prepare quiz options: 1 correct + 2 incorrect meanings from fetchRandomMeanings
     const prepareQuiz = async () => {
         // Fetch the correct meaning
         const correct = await fetchRandomMeaningg();
@@ -67,13 +68,15 @@ const ShowWords = () => {
             }
         }
 
+        // Log the collected incorrect meanings
         console.log('Collected incorrect meanings:', incorrects);
 
         // Combine into quiz options
         const options = [
             { text: correct.meaning || correct.example || 'Correct meaning missing', isCorrect: true }, // Correct meaning
             ...incorrects.map((item, index) => ({
-                text: item["meaning"][0]["definition"] || 'Incorrect meaning missing', // Adjusted based on your fix
+                // text: item.meanings || item.example || item.definition || 'Incorrect meaning missing', // Try multiple fields
+                text: item["meaning"][0]["definition"] || item.example || item.definition || 'Incorrect meaning missing', // Try multiple fields
                 isCorrect: false,
             })),
         ];
@@ -85,24 +88,16 @@ const ShowWords = () => {
             [options[i], options[j]] = [options[j], options[i]];
         }
 
-        setIncorrectMeanings(incorrects);
+        setIncorrectMeanings(incorrects); // Store for reference
         setQuizOptions(options);
         setSelectedOption(null); // Reset selection
         setFeedback(''); // Reset feedback
     };
 
-    // Handle user selection with auto-next on correct answer
+    // Handle user selection
     const handleOptionClick = (option) => {
         setSelectedOption(option);
-        if (option.isCorrect) {
-            setFeedback('Correct!');
-            // Automatically fetch new word after a short delay
-            setTimeout(() => {
-                prepareQuiz();
-            }, 1500); // 1.5-second delay to show feedback
-        } else {
-            setFeedback('Incorrect. Try again!');
-        }
+        setFeedback(option.isCorrect ? 'Correct!' : 'Incorrect. Try again!');
     };
 
     // Fetch data and prepare quiz on mount
@@ -119,7 +114,7 @@ const ShowWords = () => {
 
             {/* Display the word */}
             {correctMeaning && (
-                <h2>Word: {correctMeaning.word || 'Unknown Word'}</h2>
+                <h2>Word: {correctMeaning.word || 'Unknown Word'}</h2> // Adjust field based on API
             )}
 
             {/* Clickable list of options */}
@@ -155,16 +150,17 @@ const ShowWords = () => {
             {feedback && (
                 <p style={{ color: feedback === 'Correct!' ? 'green' : 'red' }}>
                     {feedback}
+                    
                 </p>
             )}
 
-            {/* Optional: Keep the button for manual refresh if needed */}
-            {/* <button
+            {/* Button to try a new quiz */}
+            <button
                 onClick={prepareQuiz}
                 style={{ marginTop: '20px', padding: '10px 20px' }}
             >
-                Next Word (Manual)
-            </button> */}
+                Next Word
+            </button>
         </div>
     );
 };
