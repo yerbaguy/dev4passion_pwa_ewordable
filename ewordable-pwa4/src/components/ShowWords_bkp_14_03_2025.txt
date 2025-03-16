@@ -1,0 +1,163 @@
+import { useState, useEffect } from 'react';
+
+const ShowWords = () => {
+    const [error, setError] = useState(null);
+    const [meaning, setMeaning] = useState([]); // State for meaning array
+    const [meanings, setMeanings] = useState([]); // State for meanings array
+    const [merged, setMerged] = useState([]); // State for merged array
+
+    // Fetch random meaning
+    const fetchRandomMeaningg = async () => {
+        try {
+            const response = await fetch('http://13.60.163.190:5000/show_random_meaningg', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setMeaning((prev) => [...prev, data]); // Add new data to meaning array
+        } catch (err) {
+            console.error('Fetch error:', err);
+            setError(err.message);
+        }
+    };
+
+    // Fetch random meanings
+    const fetchRandomMeanings = async () => {
+        try {
+            const response = await fetch('http://13.60.163.190:5000/show_random_meanings_to_the_word', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setMeanings((prev) => [...prev, data]); // Add new data to meanings array
+        } catch (err) {
+            console.error('Fetch error:', err);
+            setError(err.message);
+        }
+    };
+
+    // Merge the arrays whenever meaning or meanings change
+    useEffect(() => {
+        const mergedArray = [...meaning, ...meanings];
+        setMerged(mergedArray);
+    }, [meaning, meanings]);
+
+    // Fetch data when the component mounts
+    useEffect(() => {
+        fetchRandomMeaningg();
+        fetchRandomMeanings();
+    }, []);
+
+    return (
+        <div>
+            <h1>Word Meanings</h1>
+
+            {/* Display error if any */}
+            {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+
+            {/* Display meaning array */}
+            <h2>Meanings:</h2>
+
+
+            <ul>
+                {meaning.length > 0 ? (
+                    meaning.map((item, index) => (
+                        <li key={index}>
+                            {/* {item.word || JSON.stringify(item)} 
+                            {item.pronounciation || JSON.stringify(item)} */}
+                            {item.word}
+                            {item.phonetic}
+                        </li>
+                    ))
+                ) : (
+                    <p>No meanings yet...</p>
+                )}
+            </ul>
+
+
+
+
+
+
+
+
+
+
+            <ul>
+                {meaning.length > 0 ? (
+                    meaning.map((item, index) => (
+                        <li key={index}>
+                            {item.example || JSON.stringify(item)} {/* Adjust based on your data structure */}
+                        </li>
+                    ))
+                ) : (
+                    <p>No meanings yet...</p>
+                )}
+            </ul>
+
+            {/* Display meanings array */}
+            <h2>Additional Meanings:</h2>
+            <ul>
+                {meanings.length > 0 ? (
+                    meanings.map((item, index) => (
+                        <li key={index}>
+                            {/* {item.meanings || JSON.stringify(item)} Adjust based on your data structure */}
+                            {item.meanings || JSON.stringify(item)} 
+                            {/* {item.meanings}  */}
+
+                        </li>
+                    ))
+                ) : (
+                    <p>No additional meanings yet...</p>
+                )}
+            </ul>
+
+            {/* Display merged array (optional) */}
+            {/* <h2>Merged Array:</h2>
+            <ul>
+                {merged.length > 0 ? (
+                    merged.map((item, index) => (
+                        <li key={index}>
+                            {item.example || item.meanings || JSON.stringify(item)}
+                        </li>
+                    ))
+                ) : (
+                    <p>No merged data yet...</p>
+                )}
+            </ul> */}
+
+            <h2>Merged Array:</h2>
+            <ul>
+                {merged.length > 0 ? (
+                    merged.map((item, index) => (
+                        <li key={index}>
+                            {item.example || item.meanings }
+                        </li>
+                    ))
+                ) : (
+                    <p>No merged data yet...</p>
+                )}
+            </ul>
+
+
+
+
+        </div>
+    );
+};
+
+export default ShowWords;

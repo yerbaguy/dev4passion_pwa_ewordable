@@ -1,0 +1,154 @@
+import React, { useState, useEffect } from 'react'
+
+const ShowWords = () => {
+
+    const [error, setError] = useState(null);
+    // const [ randomMeaning, setRandomMeaning ] = useState([]);
+    const [randomMeaning, setRandomMeaning] = useState('');
+
+    const [ meaning, setMeaning ] = useState([]);
+    const [ meanings, setMeanings ] = useState([]);
+
+    // const meaning = [];
+    // const meanings = [];
+    const merged = [];
+
+    const mergedarray = meaning.concat(meanings);
+    merged.push(mergedarray);
+
+
+    const fetchRandomMeaningg = async () => {
+
+        try {
+            const response = await fetch('http://13.60.163.190:5000/show_random_meaningg', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Random meaning to the word:', data);
+
+            // setRandomMeaning([...randomMeaning, data])
+            //setRandomMeaning(data)
+            meaning.push(data)
+            console.log("meaning", meaning)
+            
+
+            // setRandomMeanings([...randomMeanings, data])
+
+            // setRandomMeaningsToTheWord(...randomMeaningsToTheWord, data)
+            //setWordData1(data)
+            // setWordData(data);
+            //  setRandomMeaningsToTheWord(data);
+            // data = "lajsdf"
+            // setRandomMeaningsToTheWord([...randomMeaningsToTheWord, data])
+            // console.log("random-meanings", randomMeaningsToTheWord)
+
+            console.log("randomMeaningg", randomMeaning)
+
+        } catch (err) {
+            console.error('Fetch error:', err);
+            setError(err.message);
+        }
+
+    }
+
+    const fetchRandomMeanings = async () => {
+
+        try {
+            const response = await fetch('http://13.60.163.190:5000/show_random_meanings_to_the_word', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Random meanings to the word:', data);
+
+            meanings.push(data);
+            console.log("meanings", meanings)
+            // setRandomMeanings([...randomMeanings, data])
+            // setRandomMeaningsToTheWord(...randomMeaningsToTheWord, data)
+            //setWordData1(data)
+            // setWordData(data);
+            //  setRandomMeaningsToTheWord(data);
+            // data = "lajsdf"
+            // setRandomMeaningsToTheWord([...randomMeaningsToTheWord, data])
+            // console.log("random-meanings", randomMeaningsToTheWord)
+
+        } catch (err) {
+            console.error('Fetch error:', err);
+            setError(err.message);
+        }
+
+    }
+
+    const mergedArray = () => {
+     
+        // const mergedarray = meaning.concat(meanings);
+        const mergedarray = [...meaning, ...meanings];
+        merged.push(mergedarray);
+    }
+
+    // const showResults = () => {
+
+    //     const showMeaning = meaning.map( (value, index) => {
+    //         const showMeanings = meanings[index];
+    //         return(
+    //             <div>
+    //                 {value.meaning}
+    //                 {showMeanings.meanings}
+    //             </div>
+    //         )
+    //     }
+    // }
+
+
+    useEffect(()=>{
+
+        fetchRandomMeaningg();
+
+        fetchRandomMeanings();
+        // mergedArray();
+        // console.log("mergedarray", mergedarray);
+        // showResults();
+    }, [])
+
+
+  return (
+    <div>
+      <h1>lkajsd</h1>
+      <h1>zzxclkjl</h1>
+
+      {
+        meaning.map( item => (
+            <li>item.example</li>
+        ))
+      }
+
+
+      {/* {
+        meaning.map( item => (
+            <h5>{item.example}</h5>
+        ))
+      }
+
+      {meanings.map( item => (
+        <h7>{item.meanings}</h7>
+      ))} */}
+    </div>
+  )
+}
+
+export default ShowWords

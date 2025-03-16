@@ -1,0 +1,152 @@
+import { useState, useEffect } from 'react';
+
+const ShowWords = () => {
+    const [error, setError] = useState(null);
+    const [meaning, setMeaning] = useState([]); // Correct meanings
+    const [meanings, setMeanings] = useState([]); // Additional (incorrect) meanings
+    const [quizOptions, setQuizOptions] = useState([]); // Options for the user to choose from
+    const [selectedOption, setSelectedOption] = useState(null); // User’s selected answer
+    const [feedback, setFeedback] = useState(''); // Feedback on correctness
+
+    // Fetch the correct meaning
+    const fetchRandomMeaningg = async () => {
+        try {
+            const response = await fetch('http://13.60.163.190:5000/show_random_meaningg', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            setMeaning([data]); // Store single correct meaning
+            return data;
+        } catch (err) {
+            console.error('Fetch error:', err);
+            setError(err.message);
+            return null;
+        }
+    };
+
+    // Fetch additional (incorrect) meanings
+    const fetchRandomMeanings = async () => {
+        try {
+            const response = await fetch('http://13.60.163.190:5000/show_random_meanings_to_the_word', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            setMeanings((prev) => [...prev, data]); // Store additional meanings
+            return data;
+        } catch (err) {
+            console.error('Fetch error:', err);
+            setError(err.message);
+            return null;
+        }
+    };
+
+    // Prepare quiz options: 1 correct + 2 incorrect meanings
+    const prepareQuiz = async () => {
+        const correctMeaning = await fetchRandomMeaningg();
+        if (!correctMeaning) return;
+
+        const incorrectMeanings = [];
+        for (let i = 0; i < 2; i++) {
+            const incorrect = await fetchRandomMeanings();
+            console.log("incorrect", incorrect);
+            
+            if (incorrect) incorrectMeanings.push(incorrect);
+        }
+
+        // Combine and shuffle options
+        const options = [
+            { text: correctMeaning.meaning || correctMeaning.example, isCorrect: true }, // Adjust field based on API
+            ...incorrectMeanings.map((m) => ({
+                text: m.meanings || m.example, // Adjust field based on API
+                isCorrect: false,
+            })),
+        ];
+
+        // Shuffle the array
+        for (let i = options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [options[i], options[j]] = [options[j], options[i]];
+        }
+
+        setQuizOptions(options);
+        setSelectedOption(null); // Reset selection
+        setFeedback(''); // Reset feedback
+    };
+
+    // Handle user selection
+    const handleOptionClick = (option) => {
+        setSelectedOption(option);
+        setFeedback(option.isCorrect ? 'Correct!' : 'Incorrect. Try again!');
+    };
+
+    // Fetch data and prepare quiz on mount
+    useEffect(() => {
+        prepareQuiz();
+    }, []);
+
+    return (
+        <div style={{ padding: '20px' }}>
+            <h1>Guess the Correct Meaning</h1>
+
+            {/* Display error if any */}
+            {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+
+            {/* Display the word */}
+            {meaning.length > 0 && (
+                <h2>Word: {meaning[0].word || 'Unknown Word'}</h2> // Adjust field based on API
+            )}
+
+            {/* Clickable list of options */}
+            <ul style={{ listStyleType: 'none', padding: 0 }}>
+                {quizOptions.length > 0 ? (
+                    quizOptions.map((option, index) => (
+                        <li
+                            key={index}
+                            onClick={() => handleOptionClick(option)}
+                            style={{
+                                padding: '10px',
+                                margin: '5px 0',
+                                backgroundColor:
+                                    selectedOption === option
+                                        ? option.isCorrect
+                                            ? '#d4edda' // Green for correct
+                                            : '#f8d7da' // Red for incorrect
+                                        : '#f1f1f1',
+                                cursor: 'pointer',
+                                borderRadius: '5px',
+                                border: '1px solid #ccc',
+                            }}
+                        >
+                            {option.text}
+                        </li>
+                    ))
+                ) : (
+                    <p>Loading options...</p>
+                )}
+            </ul>
+
+            {/* Feedback */}
+            {feedback && (
+                <p style={{ color: feedback === 'Correct!' ? 'green' : 'red' }}>
+                    {feedback}
+                </p>
+            )}
+
+            {/* Button to try a new quiz */}
+            <button
+                onClick={prepareQuiz}
+                style={{ marginTop: '20px', padding: '10px 20px' }}
+            >
+                Next Word
+            </button>
+        </div>
+    );
+};
+
+export default ShowWords;
