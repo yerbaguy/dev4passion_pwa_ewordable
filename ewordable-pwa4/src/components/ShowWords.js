@@ -8,6 +8,10 @@ const ShowWords = () => {
     const [selectedOption, setSelectedOption] = useState(null); // User’s selected answer
     const [feedback, setFeedback] = useState(''); // Feedback on correctness
 
+    // const text = "Correct meaning of a word: {correctMeaning.word || 'Unknown Word'} \n Phontic meaning: {correctMeaning.phonetic} ";
+
+
+
     // Fetch the correct meaning
     const fetchRandomMeaningg = async () => {
         try {
@@ -110,16 +114,33 @@ const ShowWords = () => {
         prepareQuiz();
     }, []);
 
+
+    const text1 = "lkjasdf";
+
     return (
         <div style={{ padding: '20px' }}>
-            <h1>Guess the Correct Meaning</h1>
+            {/* <h1>Guess the Correct Meaning</h1> */}
+            <h1>guess meaning of a word</h1>
+
+            {/* const text = 'Correct meaning of a word: {correctMeaning.word || 'Unknown Word'} \n Phontic meaning: {correctMeaning.phonetic} '; */}
 
             {/* Display error if any */}
             {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
             {/* Display the word */}
             {correctMeaning && (
-                <h2>Word: {correctMeaning.word || 'Unknown Word'}</h2>
+                // <h2>Word: {correctMeaning.word || 'Unknown Word'}</h2>
+                // <h4>{correctMeaning.word || 'Unknown Word'}
+                //      {correctMeaning.phonetic}</h4>
+
+                <div>
+                    a word to guess the meaning of: <strong>{correctMeaning.word || 'Unknown Word'} </strong><br />
+                    phonetics of this word: <stong>{correctMeaning.phonetic || 'N/A'} </stong>
+                </div>
+               
+               
+                
+                
             )}
 
             {/* Clickable list of options */}
